@@ -5,12 +5,14 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.krakedev.veterinaria.entity.mascota;
+import com.krakedev.veterinaria.entity.Mascota;
 import java.util.List;
 
 @Repository
-public interface MascotaRepository extends JpaRepository<mascota, Long> {
-    Optional<mascota> findById(Long id);
+public interface MascotaRepository extends JpaRepository<Mascota, Long> {
+    Optional<Mascota> findById(Long id);
 
-    Optional<mascota> findByNombre(String nombre);
+    Optional<Mascota> findByNombre(String nombre);
+
+    List<Mascota> findAll();
 }

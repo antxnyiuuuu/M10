@@ -1,58 +1,71 @@
-/*
- * package com.krakedev.veterinaria.controller;
- * 
- * import java.util.ArrayList;
- * import java.util.List;
- * import java.util.Optional;
- * 
- * import org.springframework.web.bind.annotation.DeleteMapping;
- * import org.springframework.web.bind.annotation.GetMapping;
- * import org.springframework.web.bind.annotation.PathVariable;
- * import org.springframework.web.bind.annotation.PostMapping;
- * import org.springframework.web.bind.annotation.RequestBody;
- * import org.springframework.web.bind.annotation.RequestMapping;
- * import org.springframework.web.bind.annotation.RestController;
- * 
- * import com.krakedev.veterinaria.entity.mascota;
- * 
- * @RestController
- * 
- * @RequestMapping("/api/mascotas")
- * public class MascotaController {
- * 
- * 
- * private List<mascota> mascotas = new ArrayList<>();
- * 
- * private MascotaController() {
- * mascotas.add(new mascota(1, "Firulais", "Perro", 3, "Juan Perez"));
- * mascotas.add(new mascota(2, "Michi", "Gato", 2, "Ana Gomez"));
- * mascotas.add(new mascota(3, "Nemo", "Pez", 1, "Carlos Ruiz"));
- * mascotas.add(new mascota(4, "Bobby", "Perro", 4, "Laura Martinez"));
- * mascotas.add(new mascota(5, "Luna", "Gato", 5, "Sofia Lopez"));
- * }
- * 
- * @GetMapping
- * public List<mascota> obtenerMascotas() {
- * return mascotas;
- * }
- * 
- * @GetMapping("/{id}")
- * public mascota obtenerMascotaPorId(@PathVariable int id) {
- * Optional<mascota> mascotaEncontrada = mascotas.stream()
- * .filter(m -> m.getId() == id).
- * findFirst();
- * return mascotaEncontrada.orElse(null);
- * }
- * 
- * @PostMapping
- * public mascota crearMascota(@RequestBody mascota mascotaNueva) {
- * mascotas.add(mascotaNueva);
- * return mascotaNueva;
- * }
- * 
- * @DeleteMapping("/{id}")
- * public void eliminarMascota(@PathVariable int id) {
- * mascotas.removeIf(m-> m.getId() == id);
- * }
- * }
- */
+package com.krakedev.veterinaria.controller;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.krakedev.veterinaria.entity.Mascota;
+import com.krakedev.veterinaria.service.MascotaService;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@RestController
+@RequestMapping("/api/mascotas")
+@RequiredArgsConstructor
+public class MascotaController {
+
+    private final MascotaService mascotaService;
+
+    @GetMapping
+    public ResponseEntity<List<Mascota>> obtenerMascotas() {
+        List<Mascota> mascotas = mascotaService.listarMascotas();
+        return ResponseEntity.ok(mascotas);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Mascota> obtenerMascotaPorId(@PathVariable Long id) {
+        Optional<Mascota> mascota = mascotaService.buscarPorId(id);
+        return mascota.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    public ResponseEntity<Mascota> obtenerMascotaPorNombre(@PathVariable String nombre) {
+        Optional<Mascota> mascota = mascotaService.buscarPorNombre(nombre);
+        return mascota.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/registrar")
+    public ResponseEntity<Mascota> crearMascota(@RequestBody Mascota mascota) {
+        Mascota nuevaMascota = mascotaService.registrarMascota(mascota);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaMascota);
+    }
+
+    public ResponseEntity<Mascota> actualizarMascota(@PathVariable Long id, @RequestBody Mascota mascota) {
+        try {
+            Mascota mascotaActualizada = mascotaService.actualizarMascota(id, mascota);
+            return ResponseEntity.ok(mascotaActualizada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    public ResponseEntity<Void> eliminarMascota(@PathVariable Long id) {
+        try {
+            mascotaService.eliminarMascota(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+}
