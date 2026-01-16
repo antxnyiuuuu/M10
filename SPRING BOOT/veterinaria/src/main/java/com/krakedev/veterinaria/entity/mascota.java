@@ -2,6 +2,8 @@ package com.krakedev.veterinaria.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,4 +34,8 @@ public class Mascota {
 
     @Column(name = "nombre_dueño", nullable = false)
     private String nombreDueño;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private EstadoMascota estado = EstadoMascota.ACTIVO;
 }
